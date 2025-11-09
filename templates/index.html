@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Real Calculator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+    // activeInput: 'num1' or 'num2'
+    let activeInput = 'num1';
+
+    // make the given input id the active one and highlight it
+    function setActiveInput(id) {
+      activeInput = id;
+      document.getElementById('num1').classList.toggle('active-input', id === 'num1');
+      document.getElementById('num2').classList.toggle('active-input', id === 'num2');
+    }
+
+    // add a digit/decimal to the currently active input
+    function addNumber(val) {
+      const el = document.getElementById(activeInput);
+      if (!el) return;
+      // Prevent multiple dots
+      if (val === '.' && el.value.includes('.')) return;
+      el.value = el.value + val;
+    }
+
+    // operator button click (does NOT change active input)
+    function selectOperator(op) {
+      const opField = document.getElementById("operator");
+      opField.value = op;
+      document.querySelectorAll('.op-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById('btn-' + op);
+      if (btn) btn.classList.add('active');
+    }
+
+    // clear everything (inputs, operator, result)
+    function clearAll() {
+      document.getElementById('num1').value = '';
+      document.getElementById('num2').value = '';
+      document.getElementById('operator').value = '';
+      // result input (display)
+      const res = document.getElementById('result');
+      if (res) res.value = '';
+      document.querySelectorAll('.op-btn').forEach(b => b.classList.remove('active'));
+      setActiveInput('num1');
+    }
+
+    // optional: when page loads, set active highlight according to current values
+    window.addEventListener('load', () => {
+      // preserve active highlight if user clicks inputs before first load
+      setActiveInput('num1');
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Calculator</h1>
+
+    <form method="POST" onsubmit="">
+      <div class="display-section">
+        <!-- clicking input chooses it as target for keypad -->
+        <input type="text" id="num1" name="num1" placeholder="First number"
+               value="{{ num1 }}" readonly onclick="setActiveInput('num1')">
+        <input type="text" id="num2" name="num2" placeholder="Second number"
+               value="{{ num2 }}" readonly onclick="setActiveInput('num2')">
+
+        <!-- hidden operator field (submitted to Flask) -->
+        <input type="hidden" id="operator" name="operator" value="{{ selected_operator }}">
+        <!-- result display (readonly) -->
+        <input type="text" id="result" value="{{ result }}" readonly placeholder="Result" class="result-display">
+      </div>
+
+      <div class="operator-section">
+        <button type="button" id="btn-+" class="op-btn" onclick="selectOperator('+')">+</button>
+        <button type="button" id="btn--" class="op-btn" onclick="selectOperator('-')">−</button>
+        <button type="button" id="btn-*" class="op-btn" onclick="selectOperator('*')">×</button>
+        <button type="button" id="btn-/" class="op-btn" onclick="selectOperator('/')">÷</button>
+      </div>
+
+      <div class="keypad-section">
+        <button type="button" class="num-btn" onclick="addNumber('7')">7</button>
+        <button type="button" class="num-btn" onclick="addNumber('8')">8</button>
+        <button type="button" class="num-btn" onclick="addNumber('9')">9</button>
+
+        <button type="button" class="num-btn" onclick="addNumber('4')">4</button>
+        <button type="button" class="num-btn" onclick="addNumber('5')">5</button>
+        <button type="button" class="num-btn" onclick="addNumber('6')">6</button>
+
+        <button type="button" class="num-btn" onclick="addNumber('1')">1</button>
+        <button type="button" class="num-btn" onclick="addNumber('2')">2</button>
+        <button type="button" class="num-btn" onclick="addNumber('3')">3</button>
+
+        <button type="button" class="num-btn" onclick="addNumber('0')">0</button>
+        <button type="button" class="num-btn" onclick="addNumber('.')">.</button>
+        <!-- optional backspace -->
+        <button type="button" class="num-btn" onclick="(function(){ const el=document.getElementById(activeInput); el.value = el.value.slice(0,-1); })()">⌫</button>
+      </div>
+
+      <div class="action-section">
+        <!-- Calculate submits the form to Flask server -->
+        <button type="submit" class="calc-btn">Calculate</button>
+        <button type="button" class="clear-btn" onclick="clearAll()">Clear</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
