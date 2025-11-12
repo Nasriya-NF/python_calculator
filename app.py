@@ -16,9 +16,9 @@ def calculate(num1, num2, operator):
         elif operator == '/':
             return "Error: Divide by zero!" if num2 == 0 else num1 / num2
         else:
-            return "Select an operator!"
+            return "Select an input!"
         
-       
+
 
 
     except ValueError:
